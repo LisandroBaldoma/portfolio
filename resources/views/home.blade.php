@@ -96,7 +96,7 @@
                 <p class="text-slate-400 text-lg mb-12 max-w-md">Cuéntanos sobre tu proyecto. Estamos listos para llevar tu marca al
                     siguiente nivel.</p>
             </div>
-            <x-contact-form />
+            <x-contact-form :services="$services" />
         </div>
     </section>
 
