@@ -37,7 +37,9 @@ class ProjectController extends Controller
             'service_ids.*' => 'exists:services,id',
         ]);
 
-        $slug = $data['slug'] ?? Str::slug($data['title']);
+        $provided = $data['slug'] ?? null;
+        $baseSlug = $provided ? Str::slug($provided) : Str::slug($data['title']);
+        $slug = $this->makeUniqueSlug($baseSlug);
 
         // Handle file uploads
         if ($request->hasFile('grid_image')) {
@@ -81,7 +83,9 @@ class ProjectController extends Controller
             'service_ids.*' => 'exists:services,id',
         ]);
 
-        $slug = $data['slug'] ?? Str::slug($data['title']);
+        $provided = $data['slug'] ?? null;
+        $baseSlug = $provided ? Str::slug($provided) : Str::slug($data['title']);
+        $slug = $this->makeUniqueSlug($baseSlug, $project->id);
 
         // Handle file uploads
         if ($request->hasFile('grid_image')) {
@@ -105,5 +109,23 @@ class ProjectController extends Controller
     {
         $project->delete();
         return redirect()->route('admin.projects.index')->with('success', 'Proyecto eliminado.');
+    }
+
+    /**
+     * Generate a unique slug based on a base string. Optionally exclude a project id.
+     */
+    private function makeUniqueSlug(string $base, int $excludeId = null): string
+    {
+        $candidate = $base;
+        $i = 1;
+
+        while (Project::where('slug', $candidate)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->exists()) {
+            $i++;
+            $candidate = $base . '-' . $i;
+        }
+
+        return $candidate;
     }
 }
