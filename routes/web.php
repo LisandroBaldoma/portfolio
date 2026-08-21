@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('services', App\Http\Controllers\Admin\ServiceController::class)->except(['show']);
+    Route::resource('projects', App\Http\Controllers\Admin\ProjectController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';
