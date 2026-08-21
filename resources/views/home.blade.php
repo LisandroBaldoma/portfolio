@@ -61,10 +61,11 @@
             <div class="flex flex-col md:flex-row items-center justify-between mb-12 gap-8">
                 <h2 class="text-4xl font-bold tracking-tight">Proyectos <span class="text-primary">Destacados</span></h2>
                 <div class="flex flex-wrap gap-3">
-                    <button class="px-6 py-2 rounded-full bg-primary text-background-dark font-bold text-sm">Todos</button>
-                    <button class="px-6 py-2 rounded-full bg-card-dark border border-border-dark hover:border-primary/50 text-slate-300 font-bold text-sm transition-all">Branding</button>
-                    <button class="px-6 py-2 rounded-full bg-card-dark border border-border-dark hover:border-primary/50 text-slate-300 font-bold text-sm transition-all">Digital</button>
-                    <button class="px-6 py-2 rounded-full bg-card-dark border border-border-dark hover:border-primary/50 text-slate-300 font-bold text-sm transition-all">Motion</button>
+                    <a href="{{ route('home') }}#proyectos" class="px-6 py-2 rounded-full text-sm font-bold {{ empty(request('service')) ? 'bg-primary text-background-dark' : 'bg-card-dark text-slate-300 border border-border-dark hover:border-primary/50' }}">Todos</a>
+
+                    @foreach($services as $svc)
+                        <a href="{{ route('home', ['service' => $svc->id]) }}#proyectos" class="px-6 py-2 rounded-full text-sm font-bold {{ (string)request('service') === (string)$svc->id ? 'bg-primary text-background-dark' : 'bg-card-dark text-slate-300 border border-border-dark hover:border-primary/50' }}">{{ $svc->name }}</a>
+                    @endforeach
                 </div>
             </div>
             <div class="masonry-grid">

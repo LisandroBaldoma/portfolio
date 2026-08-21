@@ -17,16 +17,19 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
+        $selectedService = $request->query('service');
+
         $services = $this->serviceService->listForHome();
 
         $projects = Project::query()
             ->where('is_active', true)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
+            ->when($selectedService, fn($q) => $q->whereHas('services', fn($q2) => $q2->where('services.id', $selectedService)))
             ->orderBy('published_at', 'desc')
             ->with('services')
             ->get();
 
-        return view('home', compact('services', 'projects'));
+        return view('home', compact('services', 'projects', 'selectedService'));
     }
 }
