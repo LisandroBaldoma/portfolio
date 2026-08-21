@@ -26,10 +26,25 @@
                 <span class="text-[10px] uppercase font-bold text-black/60 tracking-widest">Likes</span>
                 <span class="text-2xl font-bold text-black tracking-tighter">{{ number_format($project->likes_count ?? 0) }}</span>
             </div>
-            <button class="group flex items-center gap-3 bg-black text-white px-6 py-3 rounded-xl hover:bg-neutral-900 transition-all">
-                <span class="material-symbols-outlined text-primary">favorite</span>
-                <span class="text-sm font-bold uppercase tracking-widest">Me gusta</span>
-            </button>
+            @php
+                $likedKey = 'liked_project_' . $project->id;
+                $isLiked = session()->has($likedKey);
+            @endphp
+            <form action="{{ route('projects.like', $project) }}" method="POST">
+                @csrf
+                <button
+                    type="submit"
+                    aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
+                    class="group flex items-center gap-3 rounded-xl px-6 py-3 transition-all border {{ $isLiked ? 'border-primary bg-primary text-black shadow-lg shadow-primary/25' : 'border-white/10 bg-black text-white hover:bg-neutral-900' }}"
+                >
+                    <span class="material-symbols-outlined {{ $isLiked ? 'text-black' : 'text-primary' }}">
+                        {{ $isLiked ? 'favorite' : 'favorite_border' }}
+                    </span>
+                    <span class="text-sm font-bold uppercase tracking-widest">
+                        {{ $isLiked ? 'Te gusta' : 'Me gusta' }}
+                    </span>
+                </button>
+            </form>
         </div>
     </section>
 

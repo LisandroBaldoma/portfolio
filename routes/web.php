@@ -17,6 +17,7 @@ Route::get('/project', function () {
 })->name('project');
 
 Route::get('/projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
+Route::post('/projects/{project:slug}/like', [ProjectController::class, 'like'])->name('projects.like');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
