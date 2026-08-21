@@ -8,6 +8,13 @@
                             <!-- Dashboard -->
                             <x-layouts.sidebar-link href="{{ route('dashboard') }}" icon='fas-house'
                                 :active="request()->routeIs('dashboard*')">Dashboard</x-layouts.sidebar-link>
+
+                            <!-- Enlaces administrativos debajo de Dashboard -->
+                            <x-layouts.sidebar-link href="{{ route('admin.services.index') }}" icon='fas-concierge-bell'
+                                :active="request()->routeIs('admin.services*')">Servicios</x-layouts.sidebar-link>
+
+                            <x-layouts.sidebar-link href="{{ route('admin.projects.index') }}" icon='fas-briefcase'
+                                :active="request()->routeIs('admin.projects*')">Proyectos</x-layouts.sidebar-link>
                             {{-- 
                             <!-- Components - Level 1 -->
                             <li x-data="{ open: false }">

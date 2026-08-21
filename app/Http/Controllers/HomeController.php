@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\ServiceService;
 use Illuminate\Http\Request;
+use App\Models\Project;
 
 class HomeController extends Controller
 {
@@ -18,6 +19,14 @@ class HomeController extends Controller
     {
         $services = $this->serviceService->listForHome();
 
-        return view('home', compact('services'));
+        $projects = Project::query()
+            ->where('is_active', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->orderBy('published_at', 'desc')
+            ->with('services')
+            ->get();
+
+        return view('home', compact('services', 'projects'));
     }
 }
