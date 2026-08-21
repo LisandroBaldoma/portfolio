@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Proyectos</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">Administra los proyectos del sitio.</p>
         </div>
-        <a href="#"
+        <a href="{{ route('admin.projects.create') }}"
             class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium">Nuevo Proyecto</a>
     </div>
 
