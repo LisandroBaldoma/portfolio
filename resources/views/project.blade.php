@@ -8,32 +8,43 @@
         </div>
         <div class="relative z-10 max-w-7xl mx-auto px-6 pb-20 w-full">
             <div class="flex flex-wrap gap-3 mb-8">
-                <span
-                    class="px-4 py-1.5 rounded-full border border-primary/50 text-primary text-xs font-bold uppercase tracking-widest bg-primary/10">Identidad
-                    de Marca</span>
-                <span
-                    class="px-4 py-1.5 rounded-full border border-white/20 text-white/70 text-xs font-bold uppercase tracking-widest bg-white/5">Sistemas
-                    de Motion</span>
+                @foreach($project->services as $svc)
+                    <span class="px-4 py-1.5 rounded-full border border-white/20 text-white/70 text-xs font-bold uppercase tracking-widest bg-white/5">{{ $svc->name }}</span>
+                @endforeach
             </div>
-            <h1 class="text-6xl md:text-8xl lg:text-[10rem] font-bold leading-[0.85] tracking-tighter uppercase mb-6">Neon<br><span
-                    class="text-primary italic">Distorsi&oacute;n</span></h1>
+            <h1 class="text-6xl md:text-8xl lg:text-[10rem] font-bold leading-[0.85] tracking-tighter uppercase mb-6">{{ $project->title }}<br><span class="text-primary italic">{{ $project->subtitle ?? '' }}</span></h1>
             <p class="max-w-xl text-lg text-slate-300 font-light leading-relaxed">
-                Una narrativa visual de alto impacto para una marca tecnol&oacute;gica que buscaba romper el ruido del mercado.
+                {{ $project->description ?? 'Descripción del proyecto aún no disponible.' }}
             </p>
         </div>
-        <div class="absolute bottom-0 right-0 z-20 bg-primary px-8 py-6 hidden lg:flex items-center gap-12 rounded-tl-3xl">
+            <div class="absolute bottom-0 right-0 z-20 bg-primary px-8 py-6 hidden lg:flex items-center gap-12 rounded-tl-3xl">
             <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-bold text-black/60 tracking-widest">Vistas</span>
-                <span class="text-2xl font-bold text-black tracking-tighter">14,208</span>
+                <span class="text-2xl font-bold text-black tracking-tighter">{{ number_format($project->views_count ?? 0) }}</span>
             </div>
             <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-bold text-black/60 tracking-widest">Likes</span>
-                <span class="text-2xl font-bold text-black tracking-tighter">2,841</span>
+                <span class="text-2xl font-bold text-black tracking-tighter">{{ number_format($project->likes_count ?? 0) }}</span>
             </div>
-            <button class="group flex items-center gap-3 bg-black text-white px-6 py-3 rounded-xl hover:bg-neutral-900 transition-all">
-                <span class="material-symbols-outlined text-primary">favorite</span>
-                <span class="text-sm font-bold uppercase tracking-widest">Me gusta</span>
-            </button>
+            @php
+                $likedKey = 'liked_project_' . $project->id;
+                $isLiked = session()->has($likedKey);
+            @endphp
+            <form action="{{ route('projects.like', $project) }}" method="POST">
+                @csrf
+                <button
+                    type="submit"
+                    aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
+                    class="group flex items-center gap-3 rounded-xl px-6 py-3 transition-all border {{ $isLiked ? 'border-primary bg-primary text-black shadow-lg shadow-primary/25' : 'border-white/10 bg-black text-white hover:bg-neutral-900' }}"
+                >
+                    <span class="material-symbols-outlined {{ $isLiked ? 'text-black' : 'text-primary' }}">
+                        {{ $isLiked ? 'favorite' : 'favorite_border' }}
+                    </span>
+                    <span class="text-sm font-bold uppercase tracking-widest">
+                        {{ $isLiked ? 'Te gusta' : 'Me gusta' }}
+                    </span>
+                </button>
+            </form>
         </div>
     </section>
 
@@ -53,9 +64,9 @@
     </section>
 
     <section class="w-full px-4 md:px-10">
-        <div class="aspect-video w-full rounded-2xl overflow-hidden group">
-            <img alt="Detalle del proyecto" class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2s]"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzic8C7ixQcYaoo29RPB0Ue7DvebGV5BMfjDxjskv8NQweD1dPzHvOHRK5SugTI5l2wA59gE2YzYGLcfA6Kp_1U_LyUNakd2mXdQYwYKfYpjfKZmHJ4YwVxnv-4-1Z67RlRo6UWk_yeWsx35F1hzWUjmjL2pTeVflciSpTQhLDMjr0hLH-rmuzMFsD_0Q6dqPNFA1td4PTBs0MrGbv6ae4lKeFQ8N-1gfPIjPqRcu2JVZWLrn0lG_QEYWefIqpVAnJuSoVwJPF69zn" />
+            <div class="aspect-video w-full rounded-2xl overflow-hidden group">
+            <img alt="{{ $project->title }}" class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2s]"
+                src="{{ $project->carousel_image_path ?? $project->grid_image_path ?? 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80' }}" />
         </div>
     </section>
 
@@ -71,19 +82,23 @@
                         class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span></a>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                @foreach (['Omni-Channel UI', 'Data Flow Visuals'] as $related)
-                    <article class="group cursor-pointer">
-                        <div class="aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-card-dark border border-white/10">
-                            <img alt="{{ $related }}"
-                                class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                                src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80" />
-                        </div>
-                        <div class="flex justify-between items-start">
-                            <h4 class="text-2xl font-bold uppercase tracking-tight mb-2">{{ $related }}</h4>
-                            <span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">north_east</span>
-                        </div>
+                @forelse($relatedProjects as $rel)
+                    <article class="group">
+                        <a href="{{ route('projects.show', $rel) }}" class="block">
+                            <div class="aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-card-dark border border-white/10">
+                                <img alt="{{ $rel->title }}"
+                                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                                    src="{{ $rel->grid_image_path ?? $rel->carousel_image_path ?? 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80' }}" />
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-2xl font-bold uppercase tracking-tight mb-2">{{ $rel->title }}</h4>
+                                <span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">north_east</span>
+                            </div>
+                        </a>
                     </article>
-                @endforeach
+                @empty
+                    <div class="col-span-1 md:col-span-2 text-slate-400">No hay proyectos relacionados.</div>
+                @endforelse
             </div>
         </div>
     </section>

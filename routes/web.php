@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Settings;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,9 @@ Route::get('/home', [HomeController::class, 'index']);
 Route::get('/project', function () {
     return view('project');
 })->name('project');
+
+Route::get('/projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
+Route::post('/projects/{project:slug}/like', [ProjectController::class, 'like'])->name('projects.like');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
