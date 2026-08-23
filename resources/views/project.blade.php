@@ -1,4 +1,4 @@
-<x-layouts.public :title="'XOKOL | Proyecto'">
+<x-layouts.public :title="'IKIGAI | Proyecto'">
 
     <section class="relative h-screen w-full flex flex-col justify-end overflow-hidden">
         <div class="absolute inset-0 z-0">
@@ -89,9 +89,10 @@
                     href="{{ route('home') }}#proyectos">Ver todos <span
                         class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span></a>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="relative" data-carousel>
+                <div class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 @forelse($relatedProjects as $rel)
-                    <article class="group">
+                    <article class="group w-[86%] shrink-0 snap-start md:w-[48%]">
                         <a href="{{ route('projects.show', $rel) }}" class="block">
                             <div
                                 class="aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-card-dark border border-white/10">
@@ -107,8 +108,21 @@
                         </a>
                     </article>
                 @empty
-                    <div class="col-span-1 md:col-span-2 text-slate-400">No hay proyectos relacionados.</div>
+                    <div class="w-full text-slate-400">No hay proyectos relacionados.</div>
                 @endforelse
+                </div>
+                @if ($relatedProjects->count() > 1)
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" data-carousel-prev aria-label="Proyecto anterior"
+                            class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-white transition hover:border-primary hover:text-primary">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                        </button>
+                        <button type="button" data-carousel-next aria-label="Siguiente proyecto"
+                            class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-white transition hover:border-primary hover:text-primary">
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
     </section>

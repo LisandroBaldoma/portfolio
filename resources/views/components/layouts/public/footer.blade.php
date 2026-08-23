@@ -6,9 +6,9 @@
                     <path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z"></path>
                 </svg>
             </div>
-            <span class="text-xl font-bold tracking-tighter">XOKOL</span>
+            <span class="text-xl font-bold tracking-tighter">IKIGAI</span>
         </a>
-        <p class="text-slate-500 text-sm">&copy; {{ now()->year }} XOKOL Studio. Todos los derechos reservados.</p>
+        <p class="text-slate-500 text-sm">&copy; {{ now()->year }} IKIGAI Studio. Todos los derechos reservados.</p>
         <div class="flex gap-6">
             <a class="text-slate-400 hover:text-primary transition-colors" href="#" aria-label="Compartir"><span
                     class="material-symbols-outlined">share</span></a>
