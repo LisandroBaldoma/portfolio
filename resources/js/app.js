@@ -73,21 +73,34 @@ window.initRichTextEditor = function (editor) {
 };
 
 document.querySelectorAll('[data-carousel]').forEach((carousel) => {
-	const track = carousel.firstElementChild;
-	const slides = track?.querySelectorAll(':scope > article');
+	const track = carousel.querySelector('[data-carousel-track]');
+	const slides = track?.querySelectorAll('[data-carousel-slide]');
 
 	if (!track || !slides?.length) {
 		return;
 	}
 
-	const scrollAmount = () => slides[0].getBoundingClientRect().width + 24;
+	let currentIndex = 0;
+
+	const goToSlide = (index) => {
+		currentIndex = Math.max(0, Math.min(index, slides.length - 1));
+		track.scrollTo({ left: slides[currentIndex].offsetLeft, behavior: 'smooth' });
+	};
 
 	carousel.querySelector('[data-carousel-prev]')?.addEventListener('click', () => {
-		track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+		goToSlide(currentIndex - 1);
 	});
 
 	carousel.querySelector('[data-carousel-next]')?.addEventListener('click', () => {
-		track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+		goToSlide(currentIndex + 1);
+	});
+
+	track.addEventListener('scrollend', () => {
+		const nearestSlide = [...slides].reduce((nearest, slide, index) =>
+			Math.abs(slide.offsetLeft - track.scrollLeft) < Math.abs(slides[nearest].offsetLeft - track.scrollLeft)
+				? index
+				: nearest, currentIndex);
+		currentIndex = nearestSlide;
 	});
 });
 

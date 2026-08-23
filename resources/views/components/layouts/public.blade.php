@@ -81,6 +81,7 @@
 
     <x-layouts.public.footer />
 
+    @vite('resources/js/app.js')
     @stack('scripts')
 </body>
 

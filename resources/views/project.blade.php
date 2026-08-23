@@ -90,9 +90,10 @@
                         class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span></a>
             </div>
             <div class="relative" data-carousel>
-                <div class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div data-carousel-track
+                    class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 @forelse($relatedProjects as $rel)
-                    <article class="group w-[86%] shrink-0 snap-start md:w-[48%]">
+                    <article data-carousel-slide class="group w-[86%] shrink-0 snap-start md:w-[48%]">
                         <a href="{{ route('projects.show', $rel) }}" class="block">
                             <div
                                 class="aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-card-dark border border-white/10">
