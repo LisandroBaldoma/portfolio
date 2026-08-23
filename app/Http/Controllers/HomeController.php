@@ -30,6 +30,8 @@ class HomeController extends Controller
             ->with('services')
             ->get();
 
-        return view('home', compact('services', 'projects', 'selectedService'));
+        $heroImage = asset('storage/projects/admin/Gemini_Generated_Image_IKIGAI_home.jpg');
+
+        return view('home', compact('services', 'projects', 'selectedService', 'heroImage'));
     }
 }

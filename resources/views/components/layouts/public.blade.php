@@ -1,4 +1,4 @@
-@props(['title' => 'XOKOL'])
+@props(['title' => 'IKIGAI'])
 
 <!DOCTYPE html>
 <html class="dark" lang="es">
@@ -20,9 +20,9 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#D4FF00',
+                        primary: '#FFC72C',
                         'background-light': '#f7f8f5',
-                        'background-dark': '#050505',
+                        'background-dark': '#0A111E',
                         'card-dark': '#121212',
                         'border-dark': '#1f1f1f',
                     },
@@ -37,7 +37,7 @@
         @layer base {
             body {
                 font-family: 'Space Grotesk', sans-serif;
-                background-color: #050505;
+                background-color: IKIGAI;
             }
         }
         .masonry-grid {
@@ -81,6 +81,7 @@
 
     <x-layouts.public.footer />
 
+    @vite('resources/js/app.js')
     @stack('scripts')
 </body>
 

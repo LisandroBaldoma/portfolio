@@ -1,23 +1,21 @@
-<x-layouts.public :title="'XOKOL | Inicio'">
+<x-layouts.public :title="'IKIGAI | Inicio'">
 
     @php
         // Projects are provided by HomeController
-    @endphp
     @endphp
 
     <section class="relative h-screen w-full flex items-center overflow-hidden pt-16">
         <div class="absolute inset-0 z-0">
             <div class="w-full h-full bg-cover bg-center transition-all duration-700 opacity-40"
-                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuArHKmqyDxpv94gnoyQrPyfFJTwjFoBdUSo4r-Yky1LenCChsPo8ynrfSsFDVULOgt1KpbOYEwmftcSqnAFgN2gKpXgmZ8T33yEiFyoF8zyRf2ExK6mienbpNpKQlTVdB8h4iyvrMxiTd7DnMA4zMoyqxGVGRE3ZHKtuOrDZJrsbZniqVvc0nFBiojAOyd-2gTnowjfL1CGLv2pmlb8Rh2jFmoR54TThOrUa-2j6R13q9SGLEPii1fpfxIdqhznbwufmBBgrx_61r7R')">
+                style="background-image: url('{{ $heroImage }}')">
             </div>
             <div class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/60 to-transparent"></div>
         </div>
         <div class="relative z-10 px-6 md:px-24 max-w-5xl">
-            <span class="text-primary font-bold tracking-[0.2em] text-xs uppercase mb-4 block">Creative Excellence</span>
-            <h1 class="text-6xl md:text-8xl font-bold leading-none mb-8 tracking-tighter">Creatividad <br> <span
-                    class="text-primary italic">Sin L&iacute;mites</span></h1>
-            <p class="text-slate-400 text-lg md:text-xl max-w-xl mb-10 font-light leading-relaxed">Elevamos tu marca al
-                siguiente nivel con estrategias digitales disruptivas y diseño de vanguardia.</p>
+            <span class="text-primary font-bold tracking-[0.2em] text-xs uppercase mb-4 block">IA & TECNOLOGÍA CON PROPÓSITO</span>
+            <h1 class="text-6xl md:text-8xl font-bold leading-none mb-8 tracking-tighter">Evolucionamos  <br> <span
+                    class="text-primary italic">tu negocio</span></h1>
+            <p class="text-slate-400 text-lg md:text-xl max-w-xl mb-10 font-light leading-relaxed">En IKIGAI transformamos la forma en que operas. Diseñamos productos digitales e integramos inteligencia artificial para optimizar procesos, conectar comunidades y llevar negocios tradicionales al siguiente nivel digital.</p>
             <div class="flex flex-wrap gap-4">
                 <a href="#proyectos"
                     class="bg-primary text-background-dark px-8 py-4 rounded-lg font-bold flex items-center gap-2 group transition-all">
@@ -35,8 +33,7 @@
                 <div>
                     <h2 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Nuestros <span class="text-primary">Servicios</span>
                     </h2>
-                    <p class="text-slate-400 max-w-md">Soluciones visuales y estratégicas para negocios que buscan destacar en la era
-                        digital.</p>
+                    <p class="text-slate-400 max-w-md">Soluciones tecnológicas, automatización con IA y arquitectura de software diseñadas para transformar y escalar la operativa de tu negocio.</p>
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

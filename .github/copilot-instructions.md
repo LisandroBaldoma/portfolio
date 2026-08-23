@@ -1,7 +1,7 @@
-# Contexto de Proyecto: XOKOL (Portfolio Oficial & CMS)
+# Contexto de Proyecto: IKIGAI (Portfolio Oficial & CMS)
 
 ## 1. Visión General
-**XOKOL** es un sitio web corporativo administrable y portfolio profesional de un **AI Engineer & Fullstack Developer**. 
+**IKIGAI** es un sitio web corporativo administrable y portfolio profesional de un **AI Engineer & Fullstack Developer**. 
 Permite presentar áreas de especialidad (servicios), exhibir proyectos/casos de estudio dinámicos con layouts flexibles mediante bloques, capturar leads mediante formularios de contacto e incluir un panel de administración (CMS) autenticado.
 
 ---

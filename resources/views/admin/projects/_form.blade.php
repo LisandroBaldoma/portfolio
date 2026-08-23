@@ -23,45 +23,20 @@
     </div>
 
     <div>
+        <label for="grid_image" class="block text-sm font-medium mb-1">Imagen Grid</label>
+        <input id="grid_image" name="grid_image" type="file" accept="image/*"
+            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 p-2">
+        @if($isEdit && !empty($project->grid_image_path))
+            <div class="mt-2">
+                <img src="{{ $project->grid_image_path }}" alt="{{ $project->title }}" class="w-48 h-auto rounded">
+            </div>
+        @endif
+    </div>
+
+    <div>
         <label for="image_carousel" class="block text-sm font-medium mb-1">Imagen Carousel</label>
         <input id="image_carousel" name="image_carousel" type="file" accept="image/*"
             class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 p-2">
-        {{-- @error('image_carousel')
-
-                        <div>
-                            <label class="mb-1 block text-sm font-medium" for="block_title_{{ $blockIndex }}">Título / texto alternativo</label>
-                            <input
-                                id="block_title_{{ $blockIndex }}"
-                                name="block_titles[{{ $blockIndex }}]"
-                                type="text"
-                                value="{{ old('block_titles.' . $blockIndex, $blockData['title'] ?? '') }}"
-                                class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
-                                class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
-                                <label class="mb-1 block text-sm font-medium">Título</label>
-                        </div>
-        {{-- @error('grid_image')
-                        <div>
-                            <label class="mb-1 mt-3 block text-sm font-medium" for="block_image_{{ $blockIndex }}">Reemplazar imagen</label>
-                            <input
-                                id="block_image_{{ $blockIndex }}"
-                                name="block_images[{{ $blockIndex }}]"
-                                type="file"
-                                accept="image/*"
-                                class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
-                            >
-                            @if(!empty($blockImage['url']))
-                                <img src="{{ $blockImage['url'] }}" alt="{{ $blockImage['alt'] ?? '' }}" class="mt-2 h-32 w-full rounded object-cover">
-                            @endif
-                        </div>
-            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-        @enderror
-        //TODO: mostrar imagen (si es formulario de editar)
-        --}}
-        @if($isEdit && !empty($project->grid_image_path))
-            <div class="mt-2">
-                <img src="{{ $project->grid_image_path }}" alt="grid" class="w-48 h-auto rounded">
-            </div>
-        @endif
     </div>
 
     <div>
