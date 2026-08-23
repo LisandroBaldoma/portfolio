@@ -6,6 +6,7 @@ use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 
 class ProjectController extends BaseController
 {
@@ -17,6 +18,7 @@ class ProjectController extends BaseController
      */
     public function show(Request $request, Project|string $project)
     {
+        Log::info('ProjectController@show called with project: ' . (is_string($project) ? $project : $project->slug));  
         // Accept either a Project instance (route-model binding) or a slug string.
         if (!($project instanceof Project)) {
             $project = Project::where('slug', $project)->firstOrFail();
@@ -31,6 +33,7 @@ class ProjectController extends BaseController
         }
 
         $project->load('services');
+        $blocks = $project->blocks()->get();
 
         // Determine related projects: those that share at least one service
         $serviceIds = $project->services->pluck('id')->toArray();
@@ -55,8 +58,11 @@ class ProjectController extends BaseController
                 ->take(4)
                 ->get();
         }
+        Log::info('Project: ' . json_encode($project, JSON_PRETTY_PRINT));
+        Log::info('Project Blocks: ' . json_encode($blocks, JSON_PRETTY_PRINT));
 
-        return view('project', compact('project', 'relatedProjects'));
+
+        return view('project', compact('project', 'relatedProjects', 'blocks'));
     }
 
     /**

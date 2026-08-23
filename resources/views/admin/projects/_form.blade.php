@@ -27,22 +27,32 @@
         <input id="image_carousel" name="image_carousel" type="file" accept="image/*"
             class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 p-2">
         {{-- @error('image_carousel')
-            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-        @enderror
-        //TODO: mostrar imagen (si es formulario de editar)
-        --}}
-        @if($isEdit && !empty($project->carousel_image_path))
-            <div class="mt-2">
-                <img src="{{ $project->carousel_image_path }}" alt="carousel" class="w-48 h-auto rounded">
-            </div>
-        @endif
-    </div>
 
-    <div>
-        <label for="grid_image" class="block text-sm font-medium mb-1">Imagen Grid</label>
-        <input id="grid_image" name="grid_image" type="file" accept="image/*"
-            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 p-2">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium" for="block_title_{{ $blockIndex }}">Título / texto alternativo</label>
+                            <input
+                                id="block_title_{{ $blockIndex }}"
+                                name="block_titles[{{ $blockIndex }}]"
+                                type="text"
+                                value="{{ old('block_titles.' . $blockIndex, $blockData['title'] ?? '') }}"
+                                class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
+                                class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
+                                <label class="mb-1 block text-sm font-medium">Título</label>
+                        </div>
         {{-- @error('grid_image')
+                        <div>
+                            <label class="mb-1 mt-3 block text-sm font-medium" for="block_image_{{ $blockIndex }}">Reemplazar imagen</label>
+                            <input
+                                id="block_image_{{ $blockIndex }}"
+                                name="block_images[{{ $blockIndex }}]"
+                                type="file"
+                                accept="image/*"
+                                class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
+                            >
+                            @if(!empty($blockImage['url']))
+                                <img src="{{ $blockImage['url'] }}" alt="{{ $blockImage['alt'] ?? '' }}" class="mt-2 h-32 w-full rounded object-cover">
+                            @endif
+                        </div>
             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
         @enderror
         //TODO: mostrar imagen (si es formulario de editar)
@@ -95,98 +105,272 @@
     </div>
 </div>
 
-@if ($isEdit)
-    <div class="my-8 border-t border-gray-200 dark:border-gray-700"></div>
+<div class="my-8 border-t border-gray-200 dark:border-gray-700"></div>
 
-    <div x-data="{ showBlocks: false, blockType: 'title' }" class="space-y-4">
+<div
+    x-data="{
+        showBlocks: false,
+        newBlocks: [],
+        deletedBlocks: [],
+        existingBlocks: {{ isset($blocks) ? $blocks->count() : 0 }}
+    }"
+    class="space-y-4"
+>
         <div class="flex items-center justify-between gap-3">
             <div>
                 <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Bloques</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Agrega bloques adicionales dentro del mismo formulario.
+                    Edita los bloques existentes o agrega nuevos bloques.
                 </p>
             </div>
+        </div>
 
+        <div class="space-y-3">
+            @forelse($blocks ?? [] as $blockIndex => $block)
+                @php
+                    $blockData = $block->data ?? [];
+                    $blockImage = $blockData['image'] ?? [];
+                    $blockImagePath = ltrim(str_replace('/storage/', '', $blockImage['url'] ?? ''), '/');
+                    $blockImageUrl = $blockImagePath && Storage::disk('public')->exists($blockImagePath)
+                        ? asset('storage/' . $blockImagePath)
+                        : null;
+                @endphp
+
+                <div
+                    x-show="!deletedBlocks.includes({{ $block->id }})"
+                    class="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                >
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <h3 class="text-base font-medium text-gray-800 dark:text-gray-100">
+                            Bloque {{ $blockIndex + 1 }}
+                        </h3>
+                        <button
+                            type="button"
+                            @click="deletedBlocks.push({{ $block->id }})"
+                            class="text-red-600 transition hover:text-red-800"
+                            title="Eliminar bloque"
+                            aria-label="Eliminar bloque"
+                        >
+                            @svg('fas-trash', 'h-5 w-5')
+                        </button>
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="block_delete_ids[]"
+                        value="{{ $block->id }}"
+                        :disabled="!deletedBlocks.includes({{ $block->id }})"
+                    >
+                    <input type="hidden" name="block_ids[{{ $blockIndex }}]" value="{{ $block->id }}">
+                    <input type="hidden" name="block_existing_images[{{ $blockIndex }}]" value="{{ $blockImagePath }}">
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <div x-data="{ editing: false }" x-init="window.initRichTextEditor($el)">
+                            <label class="mb-1 block text-sm font-medium">Título</label>
+                            <div x-show="!editing" class="flex items-center justify-between rounded-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">
+                                <span class="truncate">{{ strip_tags(old('block_titles.' . $blockIndex, $blockData['title'] ?? '')) ?: 'Sin título' }}</span>
+                                <button type="button" @click="editing = true" class="ml-3 text-sm text-blue-600 hover:text-blue-800">Editar</button>
+                            </div>
+                            <div x-show="editing" x-cloak>
+                            <div class="mb-2 flex flex-wrap gap-1 rounded-t-md border border-b-0 border-gray-300 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+                                <button type="button" data-command="bold" class="rounded px-2 py-1 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700" title="Negrita">B</button>
+                                <button type="button" data-command="italic" class="rounded px-2 py-1 text-sm italic hover:bg-gray-200 dark:hover:bg-gray-700" title="Cursiva">I</button>
+                                <button type="button" data-command="underline" class="rounded px-2 py-1 text-sm underline hover:bg-gray-200 dark:hover:bg-gray-700" title="Subrayado">U</button>
+                                <button type="button" data-command="insertUnorderedList" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Lista">&#8226;</button>
+                                <button type="button" data-command="createLink" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Enlace">&#128279;</button>
+                                <select data-command="fontSize" class="rounded border-gray-300 px-1 py-1 text-sm dark:border-gray-600 dark:bg-gray-900" title="Tamaño">
+                                    <option value="3">Tamaño</option>
+                                    <option value="2">Pequeño</option>
+                                    <option value="4">Mediano</option>
+                                    <option value="5">Grande</option>
+                                    <option value="7">Extra grande</option>
+                                </select>
+                                <input type="color" data-command="foreColor" value="#111827" class="h-8 w-8 cursor-pointer rounded border border-gray-300 p-1 dark:border-gray-600" title="Color">
+                            </div>
+                            <input type="hidden" name="block_titles[{{ $blockIndex }}]" value="{{ old('block_titles.' . $blockIndex, $blockData['title'] ?? '') }}">
+                            <div
+                                contenteditable="true"
+                                role="textbox"
+                                aria-label="Título"
+                                class="min-h-10 w-full rounded-b-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
+                            >{!! old('block_titles.' . $blockIndex, $blockData['title'] ?? '') !!}</div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ editing: false }" x-init="window.initRichTextEditor($el)">
+                            <label class="mb-1 block text-sm font-medium" for="block_subtitle_{{ $blockIndex }}">Subtítulo</label>
+                            <div x-show="!editing" class="flex items-center justify-between rounded-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">
+                                <span class="truncate">{{ strip_tags(old('block_subtitles.' . $blockIndex, $blockData['subtitle'] ?? '')) ?: 'Sin subtítulo' }}</span>
+                                <button type="button" @click="editing = true" class="ml-3 text-sm text-blue-600 hover:text-blue-800">Editar</button>
+                            </div>
+                            <div x-show="editing" x-cloak>
+                                <div class="mb-2 flex flex-wrap gap-1 rounded-t-md border border-b-0 border-gray-300 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+                                    <button type="button" data-command="bold" class="rounded px-2 py-1 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700" title="Negrita">B</button>
+                                    <button type="button" data-command="italic" class="rounded px-2 py-1 text-sm italic hover:bg-gray-200 dark:hover:bg-gray-700" title="Cursiva">I</button>
+                                    <button type="button" data-command="underline" class="rounded px-2 py-1 text-sm underline hover:bg-gray-200 dark:hover:bg-gray-700" title="Subrayado">U</button>
+                                    <select data-command="fontSize" class="rounded border-gray-300 px-1 py-1 text-sm dark:border-gray-600 dark:bg-gray-900" title="Tamaño">
+                                        <option value="3">Tamaño</option><option value="2">Pequeño</option><option value="4">Mediano</option><option value="5">Grande</option><option value="7">Extra grande</option>
+                                    </select>
+                                    <input type="color" data-command="foreColor" value="#111827" class="h-8 w-8 cursor-pointer rounded border border-gray-300 p-1 dark:border-gray-600" title="Color">
+                                </div>
+                                <input type="hidden" name="block_subtitles[{{ $blockIndex }}]" value="{{ old('block_subtitles.' . $blockIndex, $blockData['subtitle'] ?? '') }}">
+                                <div contenteditable="true" role="textbox" aria-label="Subtítulo" class="min-h-10 w-full rounded-b-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">{!! old('block_subtitles.' . $blockIndex, $blockData['subtitle'] ?? '') !!}</div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ editing: false }" x-init="window.initRichTextEditor($el)">
+                            <label class="mb-1 block text-sm font-medium" for="block_content_{{ $blockIndex }}">Contenido</label>
+                            <div x-show="!editing" class="flex items-center justify-between rounded-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">
+                                <span class="line-clamp-2">{{ strip_tags(old('block_contents.' . $blockIndex, $blockData['text'] ?? '')) ?: 'Sin contenido' }}</span>
+                                <button type="button" @click="editing = true" class="ml-3 shrink-0 text-sm text-blue-600 hover:text-blue-800">Editar</button>
+                            </div>
+                            <div x-show="editing" x-cloak>
+                            <div>
+                                <div class="mb-2 flex flex-wrap gap-1 rounded-t-md border border-b-0 border-gray-300 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+                                    <button type="button" data-command="bold" class="rounded px-2 py-1 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700" title="Negrita">B</button>
+                                    <button type="button" data-command="italic" class="rounded px-2 py-1 text-sm italic hover:bg-gray-200 dark:hover:bg-gray-700" title="Cursiva">I</button>
+                                    <button type="button" data-command="underline" class="rounded px-2 py-1 text-sm underline hover:bg-gray-200 dark:hover:bg-gray-700" title="Subrayado">U</button>
+                                    <button type="button" data-command="insertUnorderedList" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Lista">&#8226;</button>
+                                    <button type="button" data-command="createLink" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Enlace">&#128279;</button>
+                                    <select data-command="fontSize" class="rounded border-gray-300 px-1 py-1 text-sm dark:border-gray-600 dark:bg-gray-900" title="Tamaño">
+                                        <option value="3">Tamaño</option>
+                                        <option value="2">Pequeño</option>
+                                        <option value="4">Mediano</option>
+                                        <option value="5">Grande</option>
+                                        <option value="7">Extra grande</option>
+                                    </select>
+                                    <input type="color" data-command="foreColor" value="#111827" class="h-8 w-8 cursor-pointer rounded border border-gray-300 p-1 dark:border-gray-600" title="Color">
+                                </div>
+                                <input type="hidden" name="block_contents[{{ $blockIndex }}]" value="{{ old('block_contents.' . $blockIndex, $blockData['text'] ?? '') }}">
+                                <div contenteditable="true" role="textbox" aria-label="Contenido" class="min-h-32 w-full rounded-b-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">{!! old('block_contents.' . $blockIndex, $blockData['text'] ?? '') !!}</div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div>                           
+                            <label class="mb-1 mt-3 block text-sm font-medium" for="block_image_{{ $blockIndex }}">Reemplazar imagen</label>
+                            <input
+                                id="block_image_{{ $blockIndex }}"
+                                name="block_images[{{ $blockIndex }}]"
+                                type="file"
+                                accept="image/*"
+                                class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
+                            >
+                            @if($blockImageUrl)
+                                <img src="{{ $blockImageUrl }}" alt="{{ $block->data['title'] ?? 'Imagen del bloque' }}" class="mt-2 h-32 w-full rounded object-cover">
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <p class="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                    Este proyecto todavía no tiene bloques.
+                </p>
+            @endforelse
+        </div>
+
+        <div class="flex justify-end">
             <button
                 type="button"
-                @click="showBlocks = !showBlocks"
+                @click="newBlocks.push({}); showBlocks = true"
                 class="inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300"
             >
-                <span x-text="showBlocks ? 'Ocultar bloque' : 'Agregar bloque'"></span>
+                Agregar bloque
             </button>
         </div>
 
         <div x-show="showBlocks" x-transition class="space-y-6" style="display: none;">
-            <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                <div class="mb-4">
-                    <h3 class="text-base font-medium text-gray-800 dark:text-gray-100">
-                        Bloque 1
-                    </h3>
+            <template x-for="(newBlock, index) in newBlocks" :key="index">
+                <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <h3 class="text-base font-medium text-gray-800 dark:text-gray-100">
+                            Bloque nuevo <span x-text="existingBlocks + index + 1"></span>
+                        </h3>
+                        <button type="button" @click="newBlocks.splice(index, 1)" class="text-sm text-red-600 hover:text-red-800">
+                            Quitar
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <div x-data="{ editing: false }" x-init="window.initRichTextEditor($el)">
+                            <label class="mb-1 block text-sm font-medium">Título</label>
+                            <div x-show="!editing" class="flex items-center justify-between rounded-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">
+                                <span class="truncate">Sin título</span>
+                                <button type="button" @click="editing = true" class="ml-3 text-sm text-blue-600 hover:text-blue-800">Editar</button>
+                            </div>
+                            <div x-show="editing" x-cloak>
+                            <div class="mb-2 flex flex-wrap gap-1 rounded-t-md border border-b-0 border-gray-300 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+                                <button type="button" data-command="bold" class="rounded px-2 py-1 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700" title="Negrita">B</button>
+                                <button type="button" data-command="italic" class="rounded px-2 py-1 text-sm italic hover:bg-gray-200 dark:hover:bg-gray-700" title="Cursiva">I</button>
+                                <button type="button" data-command="underline" class="rounded px-2 py-1 text-sm underline hover:bg-gray-200 dark:hover:bg-gray-700" title="Subrayado">U</button>
+                                <button type="button" data-command="insertUnorderedList" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Lista">&#8226;</button>
+                                <button type="button" data-command="createLink" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Enlace">&#128279;</button>
+                                <select data-command="fontSize" class="rounded border-gray-300 px-1 py-1 text-sm dark:border-gray-600 dark:bg-gray-900" title="Tamaño">
+                                    <option value="3">Tamaño</option>
+                                    <option value="2">Pequeño</option>
+                                    <option value="4">Mediano</option>
+                                    <option value="5">Grande</option>
+                                    <option value="7">Extra grande</option>
+                                </select>
+                                <input type="color" data-command="foreColor" value="#111827" class="h-8 w-8 cursor-pointer rounded border border-gray-300 p-1 dark:border-gray-600" title="Color">
+                            </div>
+                            <input type="hidden" :name="`block_titles[new_${index}]`" value="">
+                            <div contenteditable="true" role="textbox" aria-label="Título" class="min-h-10 w-full rounded-b-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"></div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ editing: false }" x-init="window.initRichTextEditor($el)">
+                            <label class="mb-1 block text-sm font-medium">Subtítulo</label>
+                            <div x-show="!editing" class="flex items-center justify-between rounded-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">
+                                <span class="truncate">Sin subtítulo</span>
+                                <button type="button" @click="editing = true" class="ml-3 text-sm text-blue-600 hover:text-blue-800">Editar</button>
+                            </div>
+                            <div x-show="editing" x-cloak>
+                                <input type="hidden" :name="`block_subtitles[new_${index}]`" value="">
+                                <div contenteditable="true" role="textbox" aria-label="Subtítulo" class="min-h-10 w-full rounded-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"></div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ editing: false }" x-init="window.initRichTextEditor($el)">
+                            <label class="mb-1 block text-sm font-medium">Contenido</label>
+                            <div x-show="!editing" class="flex items-center justify-between rounded-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">
+                                <span class="line-clamp-2">Sin contenido</span>
+                                <button type="button" @click="editing = true" class="ml-3 shrink-0 text-sm text-blue-600 hover:text-blue-800">Editar</button>
+                            </div>
+                            <div x-show="editing" x-cloak>
+                            <div>
+                                <div class="mb-2 flex flex-wrap gap-1 rounded-t-md border border-b-0 border-gray-300 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+                                    <button type="button" data-command="bold" class="rounded px-2 py-1 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700" title="Negrita">B</button>
+                                    <button type="button" data-command="italic" class="rounded px-2 py-1 text-sm italic hover:bg-gray-200 dark:hover:bg-gray-700" title="Cursiva">I</button>
+                                    <button type="button" data-command="underline" class="rounded px-2 py-1 text-sm underline hover:bg-gray-200 dark:hover:bg-gray-700" title="Subrayado">U</button>
+                                    <button type="button" data-command="insertUnorderedList" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Lista">&#8226;</button>
+                                    <button type="button" data-command="createLink" class="rounded px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-gray-700" title="Enlace">&#128279;</button>
+                                    <select data-command="fontSize" class="rounded border-gray-300 px-1 py-1 text-sm dark:border-gray-600 dark:bg-gray-900" title="Tamaño">
+                                        <option value="3">Tamaño</option>
+                                        <option value="2">Pequeño</option>
+                                        <option value="4">Mediano</option>
+                                        <option value="5">Grande</option>
+                                        <option value="7">Extra grande</option>
+                                    </select>
+                                    <input type="color" data-command="foreColor" value="#111827" class="h-8 w-8 cursor-pointer rounded border border-gray-300 p-1 dark:border-gray-600" title="Color">
+                                </div>
+                                <input type="hidden" :name="`block_contents[new_${index}]`" value="">
+                                <div contenteditable="true" role="textbox" aria-label="Contenido" class="min-h-32 w-full rounded-b-md border border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"></div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium">Imagen</label>
+                            <input type="file" :name="`block_images[new_${index}]`" accept="image/*" class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900">
+                        </div>
+                    </div>
                 </div>
+            </template>
 
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label class="mb-1 block text-sm font-medium" for="block_content_type_1">
-                            Tipo de Contenido
-                        </label>
-
-                        <select
-                            id="block_content_type_1"
-                            x-model="blockType"
-                            name="block_content_types[]"
-                            class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
-                        >
-                            <option value="title">Título</option>
-                            <option value="text">Texto</option>
-                            <option value="image">Imagen</option>
-                        </select>
-                    </div>
-
-                    <div x-show="blockType === 'title'" x-transition>
-                        <label class="mb-1 block text-sm font-medium" for="block_title_1">
-                            Título
-                        </label>
-
-                        <input
-                            id="block_title_1"
-                            name="block_titles[]"
-                            type="text"
-                            class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
-                        >
-                    </div>
-
-                    <div x-show="blockType === 'text'" x-transition>
-                        <label class="mb-1 block text-sm font-medium" for="block_content_1">
-                            Texto enriquecido
-                        </label>
-
-                        <textarea
-                            id="block_content_1"
-                            name="block_contents[]"
-                            rows="5"
-                            data-rich-text="true"
-                            class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
-                        ></textarea>
-                    </div>
-
-                    <div x-show="blockType === 'image'" x-transition>
-                        <label class="mb-1 block text-sm font-medium" for="block_image_1">
-                            Imagen
-                        </label>
-
-                        <input
-                            id="block_image_1"
-                            name="block_images[]"
-                            type="file"
-                            accept="image/*"
-                            class="w-full rounded-md border-gray-300 p-2 dark:border-gray-700 dark:bg-gray-900"
-                        >
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
-@endif
+</div>
 
 <div class="mt-6 flex gap-3">
     <button type="submit"

@@ -12,9 +12,9 @@ Route::post('/contact/send', [App\Http\Controllers\ContactController::class, 'se
 
 Route::get('/home', [HomeController::class, 'index']);
 
-Route::get('/project', function () {
-    return view('project');
-})->name('project');
+// Route::get('/project', function () {
+//     return view('project');
+// })->name('project');
 
 Route::get('/projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
 Route::post('/projects/{project:slug}/like', [ProjectController::class, 'like'])->name('projects.like');
