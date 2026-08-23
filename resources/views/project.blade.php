@@ -2,29 +2,36 @@
 
     <section class="relative h-screen w-full flex flex-col justify-end overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img alt="Project Hero" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
+            <img alt="Project Hero"
+                class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTVO4cJ9DON_clO_Kg_J5zMC03VuUIpJf0fE1_jipfnNyWb-KXENx6NF1zCJHhtUSnZEGSOEZO6aeQMvMZi4NIteUjTTegeUz7bPNleoB7EgzgjV9jpqa8bIwTphcUttnY8vvKdBZIowrX7wBQq0IS2feVg9FiRoe69GpanH55Qk-jm4cqI6fXtZwa9dZQ-s9w_6dpxauyfhdFinc2mDdRqvU7jFhGmaCc1srHskIdqpXSj48VIffrAm858LT5IjV5yfSxkcpmHZc3" />
-            <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/40 to-transparent">
+            </div>
         </div>
         <div class="relative z-10 max-w-7xl mx-auto px-6 pb-20 w-full">
             <div class="flex flex-wrap gap-3 mb-8">
-                @foreach($project->services as $svc)
-                    <span class="px-4 py-1.5 rounded-full border border-white/20 text-white/70 text-xs font-bold uppercase tracking-widest bg-white/5">{{ $svc->name }}</span>
+                @foreach ($project->services as $svc)
+                    <span
+                        class="px-4 py-1.5 rounded-full border border-white/20 text-white/70 text-xs font-bold uppercase tracking-widest bg-white/5">{{ $svc->name }}</span>
                 @endforeach
             </div>
-            <h1 class="text-6xl md:text-8xl lg:text-[10rem] font-bold leading-[0.85] tracking-tighter uppercase mb-6">{{ $project->title }}<br><span class="text-primary italic">{{ $project->subtitle ?? '' }}</span></h1>
+            <h1 class="text-6xl md:text-8xl lg:text-[10rem] font-bold leading-[0.85] tracking-tighter uppercase mb-6">
+                {{ $project->title }}<br><span class="text-primary italic">{{ $project->subtitle ?? '' }}</span></h1>
             <p class="max-w-xl text-lg text-slate-300 font-light leading-relaxed">
                 {{ $project->description ?? 'Descripción del proyecto aún no disponible.' }}
             </p>
         </div>
-            <div class="absolute bottom-0 right-0 z-20 bg-primary px-8 py-6 hidden lg:flex items-center gap-12 rounded-tl-3xl">
+        <div
+            class="absolute bottom-0 right-0 z-20 bg-primary px-8 py-6 hidden lg:flex items-center gap-12 rounded-tl-3xl">
             <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-bold text-black/60 tracking-widest">Vistas</span>
-                <span class="text-2xl font-bold text-black tracking-tighter">{{ number_format($project->views_count ?? 0) }}</span>
+                <span
+                    class="text-2xl font-bold text-black tracking-tighter">{{ number_format($project->views_count ?? 0) }}</span>
             </div>
             <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-bold text-black/60 tracking-widest">Likes</span>
-                <span class="text-2xl font-bold text-black tracking-tighter">{{ number_format($project->likes_count ?? 0) }}</span>
+                <span
+                    class="text-2xl font-bold text-black tracking-tighter">{{ number_format($project->likes_count ?? 0) }}</span>
             </div>
             @php
                 $likedKey = 'liked_project_' . $project->id;
@@ -32,11 +39,8 @@
             @endphp
             <form action="{{ route('projects.like', $project) }}" method="POST">
                 @csrf
-                <button
-                    type="submit"
-                    aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
-                    class="group flex items-center gap-3 rounded-xl px-6 py-3 transition-all border {{ $isLiked ? 'border-primary bg-primary text-black shadow-lg shadow-primary/25' : 'border-white/10 bg-black text-white hover:bg-neutral-900' }}"
-                >
+                <button type="submit" aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
+                    class="group flex items-center gap-3 rounded-xl px-6 py-3 transition-all border {{ $isLiked ? 'border-primary bg-primary text-black shadow-lg shadow-primary/25' : 'border-white/10 bg-black text-white hover:bg-neutral-900' }}">
                     <span class="material-symbols-outlined {{ $isLiked ? 'text-black' : 'text-primary' }}">
                         {{ $isLiked ? 'favorite' : 'favorite_border' }}
                     </span>
@@ -47,28 +51,32 @@
             </form>
         </div>
     </section>
-
-    <section class="py-24 md:py-40 bg-background-dark">
-        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
-            <div class="md:col-span-4">
-                <h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-4">01. El Desaf&iacute;o</h3>
-                <h2 class="text-4xl font-bold tracking-tight uppercase leading-none">Redefinir lo<br>subterr&aacute;neo.</h2>
+    @foreach ($blocks as $block)
+        <section class="py-24 md:py-40 bg-background-dark">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
+                <div class="md:col-span-4">
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-4">{!! $block->safeSubtitleHtml() !!}</h3>
+                    <h2 class="text-4xl font-bold tracking-tight uppercase leading-none">
+                        {!! $block->safeTitleHtml() !!}
+                    </h2>
+                </div>
+                <div class="md:col-span-8">
+                    <p class="text-xl md:text-2xl text-slate-300 font-light leading-relaxed">
+                        {!! $block->safeTextHtml() !!}
+                    </p>
+                </div>
             </div>
-            <div class="md:col-span-8">
-                <p class="text-xl md:text-2xl text-slate-300 font-light leading-relaxed">
-                    El objetivo fue crear un lenguaje gr&aacute;fico premium y crudo al mismo tiempo: tipograf&iacute;a agresiva, alto
-                    contraste y composiciones que transmiten energ&iacute;a en cada punto de contacto.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="w-full px-4 md:px-10">
-            <div class="aspect-video w-full rounded-2xl overflow-hidden group">
-            <img alt="{{ $project->title }}" class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2s]"
-                src="{{ $project->carousel_image_path ?? $project->grid_image_path ?? 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80' }}" />
-        </div>
-    </section>
+        </section>
+        @if ($block->imageUrl())
+            <section class="w-full px-4 md:px-10">
+                <div class="aspect-video w-full rounded-2xl overflow-hidden group">
+                    <img alt="{{ strip_tags($block->safeTitleHtml()) ?: $project->title }}"
+                        class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[2s]"
+                        src="{{ $block->imageUrl() }}" />
+                </div>
+            </section>
+        @endif
+    @endforeach
 
     <section class="py-24 border-t border-white/5 bg-background-dark/50">
         <div class="max-w-7xl mx-auto px-6">
@@ -85,14 +93,16 @@
                 @forelse($relatedProjects as $rel)
                     <article class="group">
                         <a href="{{ route('projects.show', $rel) }}" class="block">
-                            <div class="aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-card-dark border border-white/10">
+                            <div
+                                class="aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-card-dark border border-white/10">
                                 <img alt="{{ $rel->title }}"
                                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                                    src="{{ $rel->grid_image_path ?? $rel->carousel_image_path ?? 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80' }}" />
+                                    src="{{ $rel->grid_image_path ?? ($rel->carousel_image_path ?? 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80') }}" />
                             </div>
                             <div class="flex justify-between items-start">
                                 <h4 class="text-2xl font-bold uppercase tracking-tight mb-2">{{ $rel->title }}</h4>
-                                <span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">north_east</span>
+                                <span
+                                    class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">north_east</span>
                             </div>
                         </a>
                     </article>
@@ -108,7 +118,8 @@
             <div>
                 <h2 class="text-5xl md:text-7xl font-bold mb-8 tracking-tighter">Hagamos algo <br><span
                         class="text-primary italic">incre&iacute;ble</span></h2>
-                <p class="text-slate-400 text-lg mb-12 max-w-md">Cu&eacute;ntanos sobre tu proyecto. Estamos listos para llevar tu marca
+                <p class="text-slate-400 text-lg mb-12 max-w-md">Cu&eacute;ntanos sobre tu proyecto. Estamos listos para
+                    llevar tu marca
                     al siguiente nivel.</p>
             </div>
             <x-contact-form />

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Service;
+use App\Services\ProjectUpdateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,7 +15,7 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::with('services')->orderBy('published_at', 'desc')->get();
+        $projects = Project::with('services')->orderBy('published_at', 'desc')->get();        
         return view('admin.projects.index', compact('projects'));
     }
 
@@ -35,6 +37,20 @@ class ProjectController extends Controller
             'is_active' => 'required|boolean',
             'service_ids' => 'nullable|array',
             'service_ids.*' => 'exists:services,id',
+            'block_ids' => 'nullable|array',
+            'block_ids.*' => 'integer|exists:project_blocks,id',
+            'block_delete_ids' => 'nullable|array',
+            'block_delete_ids.*' => 'integer|exists:project_blocks,id',
+            'block_existing_images' => 'nullable|array',
+            'block_existing_images.*' => 'nullable|string',
+            'block_titles' => 'nullable|array',
+            'block_titles.*' => 'nullable|string',
+            'block_subtitles' => 'nullable|array',
+            'block_subtitles.*' => 'nullable|string|max:255',
+            'block_contents' => 'nullable|array',
+            'block_contents.*' => 'nullable|string',
+            'block_images' => 'nullable|array',
+            'block_images.*' => 'nullable|image|max:5120',
         ]);
 
         $provided = $data['slug'] ?? null;
@@ -44,12 +60,12 @@ class ProjectController extends Controller
         // Handle file uploads
         if ($request->hasFile('grid_image')) {
             $path = $request->file('grid_image')->store('projects', 'public');
-            $data['grid_image_path'] = Storage::url($path);
+            $data['grid_image_path'] = $path;
         }
 
         if ($request->hasFile('image_carousel')) {
             $path = $request->file('image_carousel')->store('projects', 'public');
-            $data['carousel_image_path'] = Storage::url($path);
+            $data['carousel_image_path'] = $path;
         }
 
         $project = Project::create(array_merge($data, ['slug' => $slug, 'published_at' => now()]));
@@ -58,19 +74,31 @@ class ProjectController extends Controller
             $project->services()->sync($data['service_ids']);
         }
 
+        // Procesar bloques de contenido si existen
+        $service = new ProjectUpdateService();
+        $service->updateProjectBlocks($project, $data, $request->file('block_images'));
+
         return redirect()->route('admin.projects.index')->with('success', 'Proyecto creado.');
     }
 
     public function edit(Project $project)
     {
+        Log::info('Editing project: ' . $project->id);
         $services = Service::orderBy('sort_order')->get();
+        $blocks = $project->blocks;
+        Log::info('Project blocks: ' . json_encode($blocks, JSON_PRETTY_PRINT));
+        Log::info('Project services: ' . json_encode($project->services, JSON_PRETTY_PRINT));
+        Log::info('Project data: ' . json_encode($project->toArray(), JSON_PRETTY_PRINT));
         // Reuse the existing 'create' view which includes the shared _form partial.
         // The form partial checks for an existing $project, so this avoids needing a separate edit view.
-        return view('admin.projects.create', compact('project', 'services'));
+        return view('admin.projects.create', compact('project', 'services', 'blocks'));
     }
 
     public function update(Request $request, Project $project)
     {
+        Log::info('Updating project: ' . $project->id);
+        Log::info('Request data: ' . json_encode($request->all(), JSON_PRETTY_PRINT));
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:projects,slug,' . $project->id,
@@ -81,26 +109,31 @@ class ProjectController extends Controller
             'is_active' => 'required|boolean',
             'service_ids' => 'nullable|array',
             'service_ids.*' => 'exists:services,id',
+            'block_ids' => 'nullable|array',
+            'block_ids.*' => 'integer|exists:project_blocks,id',
+            'block_delete_ids' => 'nullable|array',
+            'block_delete_ids.*' => 'integer|exists:project_blocks,id',
+            'block_existing_images' => 'nullable|array',
+            'block_existing_images.*' => 'nullable|string',
+            'block_titles' => 'nullable|array',
+            'block_titles.*' => 'nullable|string',
+            'block_subtitles' => 'nullable|array',
+            'block_subtitles.*' => 'nullable|string|max:255',
+            'block_contents' => 'nullable|array',
+            'block_contents.*' => 'nullable|string',
+            'block_images' => 'nullable|array',
+            'block_images.*' => 'nullable|image|max:5120',
         ]);
 
-        $provided = $data['slug'] ?? null;
-        $baseSlug = $provided ? Str::slug($provided) : Str::slug($data['title']);
-        $slug = $this->makeUniqueSlug($baseSlug, $project->id);
-
-        // Handle file uploads
-        if ($request->hasFile('grid_image')) {
-            $path = $request->file('grid_image')->store('projects', 'public');
-            $data['grid_image_path'] = Storage::url($path);
-        }
-
-        if ($request->hasFile('image_carousel')) {
-            $path = $request->file('image_carousel')->store('projects', 'public');
-            $data['carousel_image_path'] = Storage::url($path);
-        }
-
-        $project->update(array_merge($data, ['slug' => $slug]));
-
-        $project->services()->sync($data['service_ids'] ?? []);
+        // Usar el Service para actualizar el proyecto y todas sus relaciones
+        $service = new ProjectUpdateService();
+        $service->update(
+            $project,
+            $data,
+            $request->file('grid_image'),
+            $request->file('image_carousel'),
+            $request->file('block_images') // Pasar las imágenes de bloques
+        );
 
         return redirect()->route('admin.projects.index')->with('success', 'Proyecto actualizado.');
     }
@@ -114,7 +147,7 @@ class ProjectController extends Controller
     /**
      * Generate a unique slug based on a base string. Optionally exclude a project id.
      */
-    private function makeUniqueSlug(string $base, int $excludeId = null): string
+    private function makeUniqueSlug(string $base, ?int $excludeId = null): string
     {
         $candidate = $base;
         $i = 1;
