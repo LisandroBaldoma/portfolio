@@ -34,10 +34,10 @@
             <a class="text-sm font-medium hover:text-primary transition-colors" href="{{ route('home') }}">Inicio</a>
             <a href="{{ route('home') }}#contacto"
                 class="bg-primary text-background-dark px-6 py-2.5 rounded-lg text-sm font-bold tracking-wide hover:opacity-90 transition-all">Contáctanos</a>
+            <a class="text-sm font-medium hover:text-primary transition-colors" href="{{ route('aboutme') }}">Sobre mí</a>
         </div>
         <button class="md:hidden text-primary">
             <span class="material-symbols-outlined">menu</span>
         </button>
     </div>
 </nav>
-

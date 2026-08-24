@@ -23,6 +23,19 @@
     </div>
 
     <div>
+        <label for="production_url" class="block text-sm font-medium mb-1">URL de producción</label>
+        <input id="production_url" name="production_url" type="url" value="{{ old('production_url', $project->production_url ?? '') }}" placeholder="https://ejemplo.com"
+            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 p-2">
+    </div>
+
+    <div>
+        <label for="technologies" class="block text-sm font-medium mb-1">Tecnologías</label>
+        <input id="technologies" name="technologies" type="text" value="{{ old('technologies', $project->technologies ?? '') }}" placeholder="Laravel, Vue.js, MySQL"
+            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 p-2">
+        <p class="mt-1 text-xs text-gray-500">Separalas con comas.</p>
+    </div>
+
+    <div>
         <label for="grid_image" class="block text-sm font-medium mb-1">Imagen Grid</label>
         <input id="grid_image" name="grid_image" type="file" accept="image/*"
             class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 p-2">

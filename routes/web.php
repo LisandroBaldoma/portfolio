@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AboutMeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Settings;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sobre-mi', [AboutMeController::class, 'index'])->name('aboutme');
 
 Route::post('/contact/send', [App\Http\Controllers\ContactController::class, 'send'])->name('contact.send');
 
