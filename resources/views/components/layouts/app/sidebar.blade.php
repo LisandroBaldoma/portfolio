@@ -15,6 +15,9 @@
 
                             <x-layouts.sidebar-link href="{{ route('admin.projects.index') }}" icon='fas-briefcase'
                                 :active="request()->routeIs('admin.projects*')">Proyectos</x-layouts.sidebar-link>
+
+                            <x-layouts.sidebar-link href="{{ route('admin.contacts.index') }}" icon='fas-envelope'
+                                :active="request()->routeIs('admin.contacts*')">Contactos</x-layouts.sidebar-link>
                             {{-- 
                             <!-- Components - Level 1 -->
                             <li x-data="{ open: false }">
