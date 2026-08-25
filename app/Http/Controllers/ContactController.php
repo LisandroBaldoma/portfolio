@@ -3,31 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendContactEmail;
+use App\Models\Contact;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
-class ContactController extends BaseController
+class ContactController extends Controller
 {
-    public function send(Request $request)
+    public function send(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:50',
+            'phone' => 'nullable|string|max:30',
             'company' => 'nullable|string|max:255',
+            'inquiry_type' => 'required|in:servicios,propuesta_laboral,otro',
             'message' => 'required|string|min:10',
             'services' => 'nullable|array',
             'services.*' => 'integer|exists:services,id',
         ]);
 
-        try {
-            SendContactEmail::dispatch($data);
+        DB::transaction(function () use ($data): void {
+            $contact = Contact::create($data);
+            $contact->services()->sync($data['services'] ?? []);
+        });
 
-            return back()->with('contact_success', 'Gracias — tu mensaje fue enviado correctamente. Te contactaremos pronto.');
-        } catch (\Exception $e) {
-            Log::error('Contact send failed: '.$e->getMessage());
-            return back()->withErrors('Ocurrió un error al enviar el mensaje. Intenta de nuevo más tarde.');
-        }
+        SendContactEmail::dispatch($data);
+
+        return back()->with('contact_success', 'Gracias, recibí tu mensaje. Me pondré en contacto a la brevedad.');
     }
 }
