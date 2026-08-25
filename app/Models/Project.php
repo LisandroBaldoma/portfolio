@@ -13,6 +13,8 @@ class Project extends Model
         'title',
         'slug',
         'description',
+        'production_url',
+        'technologies',
         'grid_image_path',
         'carousel_image_path',
         'published_at',
