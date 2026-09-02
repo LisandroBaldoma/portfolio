@@ -9,7 +9,6 @@ use App\Services\ProjectUpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -58,15 +57,16 @@ class ProjectController extends Controller
         $provided = $data['slug'] ?? null;
         $baseSlug = $provided ? Str::slug($provided) : Str::slug($data['title']);
         $slug = $this->makeUniqueSlug($baseSlug);
+        $service = new ProjectUpdateService();
 
         // Handle file uploads
         if ($request->hasFile('grid_image')) {
-            $path = $request->file('grid_image')->store('projects', 'public');
+            $path = $service->storeImage($request->file('grid_image'), 'projects');
             $data['grid_image_path'] = $path;
         }
 
         if ($request->hasFile('image_carousel')) {
-            $path = $request->file('image_carousel')->store('projects', 'public');
+            $path = $service->storeImage($request->file('image_carousel'), 'projects');
             $data['carousel_image_path'] = $path;
         }
 
@@ -77,7 +77,6 @@ class ProjectController extends Controller
         }
 
         // Procesar bloques de contenido si existen
-        $service = new ProjectUpdateService();
         $service->updateProjectBlocks($project, $data, $request->file('block_images'));
 
         return redirect()->route('admin.projects.index')->with('success', 'Proyecto creado.');

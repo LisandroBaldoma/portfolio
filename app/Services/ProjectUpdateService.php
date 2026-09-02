@@ -6,6 +6,8 @@ use App\Models\Project;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class ProjectUpdateService
 {
@@ -33,12 +35,12 @@ class ProjectUpdateService
 
         // Procesar imágenes
         if ($gridImage) {
-            $path = $gridImage->store('projects', 'public');
+            $path = $this->storeImage($gridImage, 'projects');
             $data['grid_image_path'] = $path;
         }
 
         if ($carouselImage) {
-            $path = $carouselImage->store('projects', 'public');
+            $path = $this->storeImage($carouselImage, 'projects');
             $data['carousel_image_path'] = $path;
         }
 
@@ -111,7 +113,7 @@ class ProjectUpdateService
             $imageAlt = $existingBlock?->data['image']['alt'] ?? '';
 
             if ($blockImage instanceof UploadedFile) {
-                $path = $blockImage->store('projects/blocks', 'public');
+                $path = $this->storeImage($blockImage, 'projects/blocks');
                 $imagePath = $path;
             }
 
@@ -140,6 +142,38 @@ class ProjectUpdateService
         }
     }
 
+    public function storeImage(UploadedFile $image, string $directory): string
+    {
+        if (!$image->isValid() || !is_readable($image->getPathname())) {
+            throw ValidationException::withMessages([
+                'images' => 'La imagen no se pudo cargar. Inténtalo nuevamente.',
+            ]);
+        }
+
+        $path = trim($directory, '/') . '/' . $image->hashName();
+        $stream = fopen($image->getPathname(), 'r');
+
+        if ($stream === false) {
+            throw ValidationException::withMessages([
+                'images' => 'La imagen no se pudo leer. Inténtalo nuevamente.',
+            ]);
+        }
+
+        try {
+            $stored = Storage::disk('public')->put($path, $stream);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }
+
+        if (!$stored) {
+            throw new RuntimeException('No se pudo guardar la imagen en el disco público.');
+        }
+
+        return $path;
+    }
+
     /**
      * Genera un slug único basado en una cadena base. Opcionalmente excluye un ID de proyecto.
      *
@@ -162,4 +196,3 @@ class ProjectUpdateService
         return $candidate;
     }
 }
-
